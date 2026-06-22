@@ -1,6 +1,5 @@
 package com.hl7;
 
-
 import ca.uhn.hl7v2.DefaultHapiContext;
 import ca.uhn.hl7v2.HapiContext;
 import ca.uhn.hl7v2.model.v24.message.ADT_A01;
@@ -11,6 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
@@ -44,10 +46,23 @@ public class CsvToHl7Converter {
     }
 
     /**
-     * Processes an uploaded CSV file from a REST endpoint.
+     * Processes an uploaded CSV file straight from a REST endpoint's MultipartFile.
      */
     public List<String> processCsvUpload(MultipartFile file) throws Exception {
         return processStream(file.getInputStream());
+    }
+
+    /**
+     * NEW: Reads a saved CSV file from the local file system (the uploads directory).
+     */
+    public List<String> processExternalFile(String filePath) throws Exception {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new FileNotFoundException("File not found on server: " + filePath);
+        }
+
+        // Pass the file stream to your existing core logic
+        return processStream(new FileInputStream(file));
     }
 
     /**
